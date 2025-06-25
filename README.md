@@ -38,43 +38,44 @@ npm run start
 
 ### **POST /movements/validate**
 
-**Description:**  
-Validates a list of movements against checkpoints (balances).
+**Purpose:**  
+Validates a set of movements and checkpoints for consistency. This endpoint does **not** modify any data or state on the server.
 
-**Request Body:**
+**Request Example:**
 {
 "movements": [
-{ "id": 1, "date": "2023-01-01", "label": "Salary", "amount": 1000 },
-{ "id": 2, "date": "2023-01-02", "label": "Rent", "amount": -500 }
+{ "id": 1, "date": "2025-06-01T00:00:00.000Z", "label": "Salary", "amount": 2500 }
 ],
 "balances": [
-{ "date": "2023-01-01", "balance": 1000 },
-{ "date": "2023-01-02", "balance": 500 }
+{ "date": "2025-06-02T00:00:00.000Z", "balance": 1000 }
 ]
 }
 
-**Response:**
-{
-"message": "ACCEPTED",
-"reasons": null
-}
+**Response Codes and Examples:**
 
-or, if errors are found:
-{
-"message": "FAILED",
-"reasons": [
-{
-"type": "OUT_OF_BOUNDS",
-"message": "Movement is outside the controlled period",
-"details": { "movementId": 3 }
-},
-{
-"type": "DUPLICATE",
-"message": "Duplicate movement detected",
-"details": { "movementId": 2 }
-}
-]
-}
+- **200 OK**  
+  - **Validation succeeded:**  
+    ```
+    { "message": "Accepted" }
+    ```
+  - **Validation failed:**  
+    ```
+    {
+      "message": "Validation failed",
+      "reasons": [
+        {
+          "type": "DUPLICATE",
+          "message": "Duplicate movement detected",
+          "details": { "movementId": 2 }
+        }
+      ]
+    }
+    ```
+- **400 Bad Request**  
+  - Only if the request is malformed or invalid (e.g., missing required fields, invalid JSON).
+
+**Note:**  
+This endpoint always returns 200 OK if the request is valid, even if the data fails validation. The validation result is detailed in the response body.
 
 ## Development Best Practices
 
@@ -83,6 +84,21 @@ or, if errors are found:
 - **Consistent error handling** and response formats.
 - **Automated testing** (recommended for future expansion).
 - **Linting and formatting** for code quality.
+
+## Testing
+
+Run automated tests to verify the correctness of the validation logic:
+
+npm run test
+
+**Tests cover:**
+- **Validation of movements and checkpoints.**
+- **Detection of movements outside the controlled period.**
+- **Identification of duplicate movements.**
+- **Balance mismatch checks between checkpoints.**
+- **Handling of cases where validation is impossible (no or only one checkpoint).**
+
+Test results help ensure the reliability and robustness of the API, making it easier to maintain and extend.
 
 ## Requirements
 

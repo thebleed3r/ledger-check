@@ -129,7 +129,7 @@ export class MovementsService {
       const end = balances[i + 1];
       let intervalSum = 0;
 
-      // Parcours des mouvements uniquement une fois (puisque triés)
+      // Process the movements in a single pass (already sorted)
       while (
         movementIndex < movements.length &&
         movements[movementIndex].date < end.date
@@ -139,7 +139,6 @@ export class MovementsService {
         }
         movementIndex++;
       }
-
       const calculatedBalance = start.balance + intervalSum;
       const delta = calculatedBalance - end.balance;
 

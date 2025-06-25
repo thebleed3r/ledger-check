@@ -1,0 +1,50 @@
+## Production Analysis
+
+### 1. Context and Problem Statement
+
+Dougs, an accounting firm, must ensure the integrity of bank transactions synchronized by external providers.  
+Duplicates and missing transactions are frequent, which can distort clients’ accounting.  
+The solution must enable automatic validation of the consistency of bank movements against control points (bank statements) and simplify the accountant’s manual verification.
+
+### 2. Proposed Solution
+
+I developed a REST API using NestJS and TypeScript that validates a list of bank movements against a series of control points (balances).  
+The algorithm detects:  
+- **Duplicates** (identical movements),  
+- **Out-of-period movements** (before the first balance or after the last one),  
+- **Balance discrepancies** (sum of movements between two balances not matching the expected difference),  
+- **Cases where validation is impossible** (fewer than two balances).  
+
+Validation is performed in a single pass over sorted movements to ensure efficiency and code clarity[1][2].
+
+### 3. API Interface
+
+- **Endpoint**: `POST /movements/validation`  
+- **Payload**:  
+  - `movements`: list of bank transactions,  
+  - `balances`: list of control points.  
+- **Response**:  
+  - **200 OK**: validation succeeded or failed (result in the body),  
+  - **400 Bad Request**: malformed request.  
+
+Validation errors are detailed in the `reasons` field, including the type, message, and necessary details to ease manual review.
+
+### 4. Strengths
+
+- **Robustness**: reliable detection of the most common errors.  
+- **Clarity**: explicit error messages with detailed information.  
+- **Extensibility**: modular code allowing addition of new rules.  
+- **Simplicity**: straightforward interface, easy to consume by other services or UIs.  
+- **User Experience**: precise diagnostics to speed up accountants’ work.
+
+### 5. Limitations and Improvement Opportunities
+
+- Fine handling of movements on boundary dates (inclusion/exclusion to be defined).  
+- A 0.01 tolerance applied to mitigate floating-point calculation errors.  
+- Automated tests should be reinforced to cover edge cases and ensure stability.
+
+### 6. Conclusion
+
+This solution effectively addresses the need for automated validation of bank transactions.  
+It facilitates rapid anomaly detection and simplifies manual review, thus ensuring the reliability of accounting data.  
+It is ready to be extended for future business requirements or integrations.
